@@ -7,11 +7,24 @@ def get_file(file, extension):
     if not parts[-1].endswith(extension):
         parts[-1] = replace_extension(parts[-1], extension)
 
-    root_config = config.EXCEL if extension == '.xlsx' else config.STF
+    # Choose the appropriate root config based on the extension
+    if extension == '.xlsx':
+        root_config = config.EXCEL
+    elif extension == '.stf':
+        root_config = config.STF
+    elif extension == '.pkl':
+        root_config = config.PICKLE
+    else:
+        raise ValueError(f"Unsupported file extension: {extension}")
+    
     return os.path.join(root_config, *parts)
+
 
 def get_stf(file):
     return get_file(file, '.stf')
+
+def get_pkl(file):
+    return get_file(file, '.pkl')
 
 def get_excel(file):
     return get_file(file, '.xlsx')
@@ -36,9 +49,30 @@ def stf_to_excel(stf_file):
     parts = remove_root_from_parts(parts, config.STF)        
     return os.path.join(config.EXCEL, *parts)
 
+def stf_to_pickle(stf_file):
+    parts = split_file_path(stf_file)
+    if parts[-1].endswith('.stf'):
+        parts[-1] = replace_extension(parts[-1], '.pkl')
+    parts = remove_root_from_parts(parts, config.STF)        
+    return os.path.join(config.PICKLE, *parts)
+
 def excel_to_stf(excel_file):
     parts = split_file_path(excel_file)
     if parts[-1].endswith('.xlsx'):
         parts[-1] = replace_extension(parts[-1], '.stf')
     parts = remove_root_from_parts(parts, config.EXCEL)        
     return os.path.join(config.STF, *parts)
+
+def excel_to_pickle(excel_file):
+    parts = split_file_path(excel_file)
+    if parts[-1].endswith('.xlsx'):
+        parts[-1] = replace_extension(parts[-1], '.pkl')
+    parts = remove_root_from_parts(parts, config.EXCEL)        
+    return os.path.join(config.PICKLE, *parts)
+
+def pickle_to_excel(pickle_file):
+    parts = split_file_path(pickle_file)
+    if parts[-1].endswith('.pkl'):
+        parts[-1] = replace_extension(parts[-1], '.xlsx')
+    parts = remove_root_from_parts(parts, config.PICKLE)        
+    return os.path.join(config.EXCEL, *parts)

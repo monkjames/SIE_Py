@@ -20,4 +20,5 @@ EXCEL = os.path.join(notebook_dir, 'string_excel', 'en')
 # local path where you exported the string STF files
 STF = os.path.join(notebook_dir, 'string', 'en')
 
-
+# local path for pickle files which form the search engine
+PICKLE = os.path.join(notebook_dir, 'pickle', 'en')

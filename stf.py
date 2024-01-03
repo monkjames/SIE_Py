@@ -96,7 +96,17 @@ def excel_publish(stf_file: str):
     with open(stf_file, 'wb') as f:
         f.write(bytes_data)
 
-    with open(stf_file.replace(config.STF, config.TRE_STAGING), 'wb') as f:
+    file_path = stf_file.replace(config.STF, config.TRE_STAGING)
+
+    # Get the directory name
+    dir_name = os.path.dirname(file_path)
+
+    # If directory does not exist, create it
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+
+    # Now, you can safely write your file
+    with open(file_path, 'wb') as f:
         f.write(bytes_data)
 
 def merge_and_publish(stf_file: str, overwrite: bool=False):
@@ -151,7 +161,7 @@ def stf_to_excel(sfile):
     stfile = ut.get_stf(sfile)
 
     if os.stat(stfile).st_size == 0:
-        print('File is empty, ignoring it.')
+        print(f'File is empty, ignoring it. {stfile}')
         return
     
     iffstr = sie.IffStream(stfile)
@@ -162,8 +172,26 @@ def stf_to_excel(sfile):
     
     excel_file = ut.get_excel(sfile)
     os.makedirs(os.path.dirname(excel_file), exist_ok=True)
-    print(excel_file)
     df.to_excel(excel_file, index=False)
+    return df
+
+def stf_to_pickle(sfile):
+    stfile = ut.get_stf(sfile)
+
+    if os.stat(stfile).st_size == 0:
+        print(f'File is empty, ignoring it. {stfile}')
+        return
+    
+    iffstr = sie.IffStream(stfile)
+    stf = sie.StringFile()
+    stf.read_object(iffstr)
+    # turn STF into a data table
+    df = pd.DataFrame([{'ID': entry.ID, 'Value': entry.Value} for entry in stf.Entries])
+    
+    pickle_file = ut.get_pkl(sfile)
+    os.makedirs(os.path.dirname(pickle_file), exist_ok=True)
+
+    df.to_pickle(pickle_file)
     return df
 
 
@@ -171,7 +199,7 @@ def stf_to_df(sfile):
     stfile = ut.get_stf(sfile)
 
     if os.stat(stfile).st_size == 0:
-        print('File is empty, ignoring it.')
+        print(f'File is empty, ignoring it. {stfile}')
         return
     
     iffstr = sie.IffStream(stfile)
@@ -182,10 +210,23 @@ def stf_to_df(sfile):
     return df
 
 
-def update_excel():
+def update_excel_pickle(make_excel: bool = True, make_pickle: bool = True):
     root = config.STF
     for root, dirs, files in os.walk(root):
         for file in files:
             lpath = os.path.join(root, file).replace(config.STF, '')[1:]
-            stf_to_excel(lpath)
-            print(lpath)
+            if make_excel:
+                stf_to_excel(lpath)
+            if make_pickle and len(config.PICKLE) > 0:
+                stf_to_pickle(lpath)
+
+def build_master():
+    dfs = []  # Initialize an empty list to store dataframes
+    root = config.EXCEL
+    for root, dirs, files in os.walk(root):
+        for file in files:
+            lpath = os.path.join(root, file).replace(config.STF, '')
+            df = pd.read_excel(lpath)
+            dfs.append(df)  # Append each dataframe to the list
+    master_df = pd.concat(dfs, ignore_index=True)  # Concatenate all dataframes in the list
+    return master_df  # Return the final dataframe

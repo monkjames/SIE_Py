@@ -62,8 +62,8 @@ class StringFile:
         for entry in self.Entries:
             iff_stream.Write(struct.pack('<I', index))
             iff_stream.Write(struct.pack('<I', 0xFFFFFFFF))
-            iff_stream.Write(struct.pack('<I', len(entry.Value)))
-            iff_stream.Write(entry.Value.encode('utf-16le'))
+            iff_stream.Write(struct.pack('<I', len(str(entry.Value))))
+            iff_stream.Write(str(entry.Value).encode('utf-16le'))
             index += 1
 
         index = 1
