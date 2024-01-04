@@ -1,5 +1,5 @@
 # Quick Notes:
-- Users are assumed to have a basic understanding of Pythong and Jupyter Notebooks
+- Users are assumed to have a basic understanding of Python and Jupyter Notebooks
 - This app was written using VS Code on a Windows computer with SIE installed
 
 # Prerequisites
